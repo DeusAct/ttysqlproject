@@ -1,13 +1,18 @@
     create schema project;
 
+    -- ID contains only numbers and only 4 numbers
     create domain dom_numericid char(4) check (value ~ '^[0-9]{4}');
 
+    -- Emaili kontroll
     create domain dom_truemail as varchar(320) CHECK (value ~'^[A-Za-z0-9._%\-+!#$&/=?^|~]+@[A-Za-z0-9.-]+[.][A-Za-z]+$');
 
+    -- Ainult t2hed nimis ja Nimi algab suure tähega
     create domain dom_truename as varchar(20) check (value ~ '[a-zA-Z]' and value ~ '^[A-Z]');
 
+    -- Ainult t2hed perekonnanimis ja Perekonnanimi algab suure tähega
     create domain dom_truelastname as varchar(30) check (value ~ '[a-zA-Z]' and value ~ '^[A-Z]');
 
+    -- url valideerimine
     create domain dom_urlcheck as varchar(2083) check (value like 'http://%' or value like 'https://%');
 
     create table project.Kategooriad
@@ -92,3 +97,25 @@
 		Tootaja_ID dom_numericid not null references project.Tootajad(tootaja_id),
 		Soovitus varchar(255)
 	);
+
+
+--Views--
+
+-- Show workers from Support department
+create view vw_supportstaff as
+    select *
+from project.tootajad
+where tootaja_amet = 'Support';
+
+-- Show client shipping data
+create view vw_clientshippingdata as
+select P.nimi, P.perekonnanimi, P.aadress, P.tel_number, C.date, C.kohaletootmise_date
+from project.klient P JOIN project.tellimus C
+on P.klient_id = C.klient_id;
+
+-- Show shopping cart comment
+create view vw_shoppingcartcomment as
+select P.ostukorv_id, P.ostukorv_link, C.soovitus
+from project.ostukorv P JOIN project.soovitused C
+on P.soovitus_id = C.soovitus_id;
+
