@@ -49,7 +49,7 @@
 		Klient_ID dom_numericid not null references project.Klient(Klient_ID),
 		Aadress_kuhu varchar(100) not null,
 		Ostukorv_data varchar(200) not null,
-		Seisund varchar(15) not null,
+		Tellimuse_staatus varchar(15) not null,
 		Date date not null,
 		Kohaletootmise_date date not null
 	);
@@ -118,4 +118,22 @@ create view vw_shoppingcartcomment as
 select P.ostukorv_id, P.ostukorv_link, C.soovitus
 from project.ostukorv P JOIN project.soovitused C
 on P.soovitus_id = C.soovitus_id;
+
+-- Show product which laoseis lower than 5
+create view vw_smallquantityproduct as
+select toode_nimetus, laoseis
+from project.toode
+where laoseis < 5;
+
+-- Show orders which made in 2019
+create view vw_2019orders as
+select tellimus_id, date
+from project.tellimus
+WHERE date BETWEEN '2019-01-01' AND '2019-12-31';
+
+-- Show orders which status is Completed (Red)
+create view vw_readyorders as
+select tellimus_id, tellimuse_staatus as Status
+from project.tellimus
+where tellimuse_staatus = 'Red'
 
