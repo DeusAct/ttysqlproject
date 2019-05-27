@@ -1,6 +1,16 @@
-	create schema project
+    create schema project;
 
-create table project.Kategooriad
+    create domain dom_numericid char(4) check (value ~ '^[0-9]{4}');
+
+    create domain dom_truemail as varchar(320) CHECK (value ~'^[A-Za-z0-9._%\-+!#$&/=?^|~]+@[A-Za-z0-9.-]+[.][A-Za-z]+$');
+
+    create domain dom_truename as varchar(20) check (value ~ '[a-zA-Z]' and value ~ '^[A-Z]');
+
+    create domain dom_truelastname as varchar(30) check (value ~ '[a-zA-Z]' and value ~ '^[A-Z]');
+
+    create domain dom_urlcheck as varchar(2083) check (value like 'http://%' or value like 'https://%');
+
+    create table project.Kategooriad
 	(
 		Kategooria_ID dom_numericid not null primary key,
 		Kategooria_nimi varchar(100)
@@ -39,6 +49,9 @@ create table project.Kategooriad
 		Kohaletootmise_date date not null
 	);
 
+    create unique index Tellimus_ID_uindex
+	on project.Tellimus (Tellimus_ID);
+
 	create unique index Tellimus_Aadress_kuhu_uindex
 		on project.Tellimus (Aadress_kuhu);
 
@@ -59,7 +72,7 @@ create table project.Kategooriad
 		Laoseis dom_numericid default 0
 	);
 
-	create unique index Toode_Toode_nimetus_uindex
+	create unique index Toode_nimetus_uindex
 		on project.Toode (Toode_nimetus);
 
 	create table project.Tootajad
@@ -79,29 +92,3 @@ create table project.Kategooriad
 		Tootaja_ID dom_numericid not null references project.Tootajad(tootaja_id),
 		Soovitus varchar(255)
 	);
-
-
-
-
-
-
--- Emaili kontroll
-create domain dom_truemail as varchar(320) CHECK (value ~'^[A-Za-z0-9._%\-+!#$&/=?^|~]+@[A-Za-z0-9.-]+[.][A-Za-z]+$');
-
--- ID contains only numbers
-create domain dom_numericid char(4) check (value ~ '^[0-9]{4}');
-
--- url valideerimine 
-
-create domain dom_urlcheck as varchar(2083) check (value like 'http://%' or value like 'https://%');
-
--- Ainult t2hed nimis ja Nimi algab suure tähega
-create domain dom_truename as varchar(20) check (value ~ '[a-zA-Z]' and value ~ '^[A-Z]');
-
--- Ainult t2hed perekonnanimis ja Perekonnanimi algab suure tähega
-create domain dom_truelastname as varchar(30) check (value ~ '[a-zA-Z]' and value ~ '^[A-Z]'); 
-
-
-
-
-
