@@ -129,11 +129,59 @@ where laoseis < 5;
 create view vw_2019orders as
 select tellimus_id, date
 from project.tellimus
-WHERE date BETWEEN '2019-01-01' AND '2019-12-31';
+where date between '2019-01-01' and '2019-12-31';
 
 -- Show orders which status is Completed (Red)
 create view vw_readyorders as
 select tellimus_id, tellimuse_staatus as Status
 from project.tellimus
-where tellimuse_staatus = 'Red'
+where tellimuse_staatus = 'Red';
 
+
+-- Functions
+
+
+-- Search for product name or pattern
+create or replace function get_productname (stoode varchar)
+   returns table (toodenimetus varchar) as $$
+begin
+   return query select
+      toode_nimetus
+   from
+      project.toode
+   where
+      toode_nimetus ilike stoode;
+end;
+$$ language plpgsql;
+
+
+-- Search order by date
+create or replace function get_orderdate (sdate varchar)
+   returns table (tellimusid int) as $$
+begin
+   return query select
+      tellimus_id::int
+   from
+      project.tellimus
+   where
+      date::varchar ilike sdate;
+end;
+$$ language plpgsql;
+
+
+-- Update order status
+create or replace function update_orderstatus(stellimusid dom_numericid, stellimusestaatus varchar(15))
+ returns void as $$
+  update project.tellimus
+    set tellimuse_staatus = stellimusestaatus
+    where tellimus_id = stellimusid;
+$$ language sql;
+
+
+-- Count days from order day to now
+create or replace function get_orderwaitingtime(stellimusid varchar)
+returns table (tellimusdatediff int) as $$
+    begin
+    return query select (current_date - date)::int from project.tellimus
+        where tellimus_id ILIKE stellimusid;
+end; $$ language plpgsql;
