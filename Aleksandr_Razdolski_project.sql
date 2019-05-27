@@ -61,15 +61,15 @@
 	create table project.Toode
 	(
 		Toode_ID dom_numericid not null primary key,
-		Kogus dom_numericid,
+		Kogus int,
 		Kategooria_ID dom_numericid not null references project.Kategooriad(Kategooria_ID),
 		Kirjeldus text,
 		Toode_tyyp varchar(20),
 		Toode_nimetus varchar(255) not null,
-		Toode_hind dom_numericid not null,
+		Toode_hind int not null,
 		Yhik varchar(10) not null,
 		Toode_pilt varchar(2083),
-		Laoseis dom_numericid default 0
+		Laoseis int default 0
 	);
 
 	create unique index Toode_nimetus_uindex
