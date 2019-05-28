@@ -183,5 +183,28 @@ create or replace function get_orderwaitingtime(stellimusid varchar)
 returns table (tellimusdatediff int) as $$
     begin
     return query select (current_date - date)::int from project.tellimus
-        where tellimus_id ILIKE stellimusid;
+        where tellimus_id ilike stellimusid;
 end; $$ language plpgsql;
+
+
+-- Get worker email by his id
+create or replace function get_workeremailbyid(stootajaid varchar)
+returns table (workermail varchar) as $$
+    begin
+        return query select tootaja_email from project.tootajad
+        where tootaja_id ilike stootajaid;
+    end; $$ language plpgsql;
+
+
+-- Get product price by id
+create or replace function get_productprice(productid varchar)
+returns table (price int) as $$
+    begin
+        return query select toode_hind from project.toode
+        where toode_id ilike productid;
+    end; $$ language plpgsql;
+
+
+-- Triggers
+
+
