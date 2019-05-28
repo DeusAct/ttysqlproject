@@ -1,0 +1,14 @@
+<table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<row>
+  <tellimus_id>1888</tellimus_id>
+  <klient_id>1385</klient_id>
+  <aadress_kuhu>5580 Raven Parkway</aadress_kuhu>
+  <tellimuse_staatus>In process</tellimuse_staatus>
+  <date>2018-11-24</date>
+  <kohaletootmise_date>2019-01-18</kohaletootmise_date>
+  <ostukorv_id>1419</ostukorv_id>
+  <makse_staatus>Paid</makse_staatus>
+</row>
+
+</table>
