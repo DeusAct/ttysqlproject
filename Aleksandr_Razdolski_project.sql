@@ -207,4 +207,29 @@ returns table (price int) as $$
 
 -- Triggers
 
+-- Deny deletion of orders with status 'In process'
+create or replace function fn_orderdeleteerror() returns trigger as $$
+    begin
+        if old.tellimuse_staatus like 'In process' then
+            raise exception 'You cannot delete order which status is "In process"';
+            end if;
+            return old;
+    end; $$ language plpgsql;
+
+create trigger tr_orderdelete before delete on project.tellimus
+    for each row execute procedure fn_orderdeleteerror();
+
+
+-- Deny deletion of current year orders
+create or replace function fn_currentyearorderdel() returns trigger as $$
+    begin
+        if date_part('year', old.date) = date_part('year', current_date) then
+            raise exception 'You cannot delete this year order';
+            end if;
+            return old;
+    end; $$ language plpgsql;
+
+create trigger tr_currentyearorderdel before delete on project.tellimus
+    for each row execute procedure fn_currentyearorderdel();
+
 
