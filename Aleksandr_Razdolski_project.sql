@@ -245,3 +245,10 @@ create trigger tr_orderwithoutpayment before update on project.tellimus
     for each row execute procedure fn_deny_change_order_without_payment();
 
 
+-- XML and JSON
+
+-- XML
+SELECT query_to_xml('SELECT * FROM project.tellimus', false, false, '');
+
+-- JSON
+SELECT row_to_json(tellimus) from project.tellimus;
