@@ -47,11 +47,12 @@
 	(
 		Tellimus_ID dom_numericid not null primary key,
 		Klient_ID dom_numericid not null references project.Klient(Klient_ID),
+		Ostukorv_ID dom_numericid not null references project.Ostukorv(Ostukorv_ID),
 		Aadress_kuhu varchar(100) not null,
-		Ostukorv_data varchar(200) not null,
-		Tellimuse_staatus varchar(15) not null,
+		Tellimuse_staatus varchar(20) not null,
 		Date date not null,
-		Kohaletootmise_date date not null
+		Kohaletootmise_date date not null,
+		makse_staatus varchar(15)
 	);
 
     create unique index Tellimus_ID_uindex
@@ -59,9 +60,6 @@
 
 	create unique index Tellimus_Aadress_kuhu_uindex
 		on project.Tellimus (Aadress_kuhu);
-
-	create unique index Tellimus_Ostukorv_data_uindex
-		on project.Tellimus (Ostukorv_data);
 
 	create table project.Toode
 	(
@@ -231,5 +229,19 @@ create or replace function fn_currentyearorderdel() returns trigger as $$
 
 create trigger tr_currentyearorderdel before delete on project.tellimus
     for each row execute procedure fn_currentyearorderdel();
+
+
+-- Deny order status update if payment status is 'Unpaid'
+create or replace function fn_deny_change_order_without_payment() returns trigger as $$
+    begin
+        if new.tellimuse_staatus like 'In process' and old.makse_staatus like 'Unpaid' then
+            raise exception 'Order status cannot be changed because customer did not paid for order';
+        end if;
+        return new;
+    end; $$ language plpgsql;
+
+
+create trigger tr_orderwithoutpayment before update on project.tellimus
+    for each row execute procedure fn_deny_change_order_without_payment();
 
 
