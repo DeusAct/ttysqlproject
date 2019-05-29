@@ -1,15 +1,15 @@
     create schema project;
 
-    -- ID contains only numbers and only 4 numbers
+    -- ID sisaldab ainult 4 numbrit
     create domain dom_numericid char(4) check (value ~ '^[0-9]{4}');
 
     -- Emaili kontroll
     create domain dom_truemail as varchar(320) CHECK (value ~'^[A-Za-z0-9._%\-+!#$&/=?^|~]+@[A-Za-z0-9.-]+[.][A-Za-z]+$');
 
-    -- Ainult t2hed nimis ja Nimi algab suure tähega
+    -- Ainult tähed Nimis ja Nimi algab suure tähega
     create domain dom_truename as varchar(20) check (value ~ '[a-zA-Z]' and value ~ '^[A-Z]');
 
-    -- Ainult t2hed perekonnanimis ja Perekonnanimi algab suure tähega
+    -- Ainult tähed perekonnanimis ja Perekonnanimi algab suure tähega
     create domain dom_truelastname as varchar(30) check (value ~ '[a-zA-Z]' and value ~ '^[A-Z]');
 
     -- url valideerimine
@@ -100,36 +100,42 @@
 --Views--
 
 -- Show workers from Support department
+-- Näita tootajaid Support osakonnast
 create view vw_supportstaff as
     select *
 from project.tootajad
 where tootaja_amet = 'Support';
 
 -- Show client shipping data
+-- Näita kliendi kohaletootmise andmed
 create view vw_clientshippingdata as
 select P.nimi, P.perekonnanimi, P.aadress, P.tel_number, C.date, C.kohaletootmise_date
 from project.klient P JOIN project.tellimus C
 on P.klient_id = C.klient_id;
 
 -- Show shopping cart comment
+-- Näita ostukorvi soovitust
 create view vw_shoppingcartcomment as
 select P.ostukorv_id, P.ostukorv_link, C.soovitus
 from project.ostukorv P JOIN project.soovitused C
 on P.soovitus_id = C.soovitus_id;
 
--- Show product which laoseis lower than 5
+-- Show products which amount in warehouse lower than 5
+-- Näita toodet, mida on laos vähem, kui 5
 create view vw_smallquantityproduct as
 select toode_nimetus, laoseis
 from project.toode
 where laoseis < 5;
 
 -- Show orders which made in 2019
+-- Näita 2019 aasta tellimusi
 create view vw_2019orders as
 select tellimus_id, date
 from project.tellimus
 where date between '2019-01-01' and '2019-12-31';
 
--- Show orders which status is Completed (Red)
+-- Show orders which status is 'Completed'
+-- Näita “'Completed' staatusega tellimusi
 create view vw_readyorders as
 select tellimus_id, tellimuse_staatus as Status
 from project.tellimus
@@ -140,6 +146,7 @@ where tellimuse_staatus = 'Red';
 
 
 -- Search for product name or pattern
+-- Otsi toodet nime või mustri järgi
 create or replace function get_productname (stoode varchar)
    returns table (toodenimetus varchar) as $$
 begin
@@ -153,7 +160,8 @@ end;
 $$ language plpgsql;
 
 
--- Search order by date
+-- Search orders by dates
+-- Otsi tellimusi kuupäeva järgi
 create or replace function get_orderdate (sdate varchar)
    returns table (tellimusid int) as $$
 begin
@@ -168,6 +176,7 @@ $$ language plpgsql;
 
 
 -- Update order status
+-- Värskenda tellimuse järgi
 create or replace function update_orderstatus(stellimusid dom_numericid, stellimusestaatus varchar(15))
  returns void as $$
   update project.tellimus
@@ -176,7 +185,8 @@ create or replace function update_orderstatus(stellimusid dom_numericid, stellim
 $$ language sql;
 
 
--- Count days from order day to now
+-- Count difference in days between order day and now
+-- Loe vahet tellimuse päeva ja tänase kuupäeva vahel päevades
 create or replace function get_orderwaitingtime(stellimusid varchar)
 returns table (tellimusdatediff int) as $$
     begin
@@ -186,6 +196,7 @@ end; $$ language plpgsql;
 
 
 -- Get worker email by his id
+-- Leia töötaja e-mail id järgi
 create or replace function get_workeremailbyid(stootajaid varchar)
 returns table (workermail varchar) as $$
     begin
@@ -195,6 +206,7 @@ returns table (workermail varchar) as $$
 
 
 -- Get product price by id
+-- Leia toote hinda id järgi
 create or replace function get_productprice(productid varchar)
 returns table (price int) as $$
     begin
@@ -206,6 +218,7 @@ returns table (price int) as $$
 -- Triggers
 
 -- Deny deletion of orders with status 'In process'
+-- Keela 'In process' staatusega tellimuste kustutamist
 create or replace function fn_orderdeleteerror() returns trigger as $$
     begin
         if old.tellimuse_staatus like 'In process' then
@@ -219,6 +232,7 @@ create trigger tr_orderdelete before delete on project.tellimus
 
 
 -- Deny deletion of current year orders
+-- Keela selle aasta tellimuste kustutamist
 create or replace function fn_currentyearorderdel() returns trigger as $$
     begin
         if date_part('year', old.date) = date_part('year', current_date) then
@@ -232,6 +246,7 @@ create trigger tr_currentyearorderdel before delete on project.tellimus
 
 
 -- Deny order status update if payment status is 'Unpaid'
+-- Keela uuendamise kui maksestaatus on 'Unpaid'
 create or replace function fn_deny_change_order_without_payment() returns trigger as $$
     begin
         if new.tellimuse_staatus like 'In process' and old.makse_staatus like 'Unpaid' then
